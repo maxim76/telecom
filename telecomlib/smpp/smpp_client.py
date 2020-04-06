@@ -1,12 +1,8 @@
-from smpplib.client import Client
 import logging
 import sys
-
 import smpplib.gsm
-import smpplib.client
-import smpplib.consts
+from smpplib.client import Client
 
-logging.basicConfig(format='%(asctime)s %(levelname)-8s %(name)-24s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='INFO')
 
 class SMPPClient(Client):
     def __init__(self, host, port, systemID, password):
@@ -32,19 +28,32 @@ class SMPPClient(Client):
                 short_message = part,
                 data_coding = encoding_flag,
                 esm_class = msg_type_flag,
-                regisered_delivery = True
+                registered_delivery = isDRRequired
             )
 
 
 # Unittest
 if __name__=="__main__":
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='DEBUG')
+    logging.info("%s is started in unittest mode" % __file__.split('/')[-1])
+
     unittestHost = "192.168.1.107"
     unittestPort = 3200
     unittestSystemID = 'test'
     unittestPassword = 'test'
     unittestMessage = u'Test message'
     unittestSrcAddr = '1.1.79161111111'
-    unittestDstAddr = '1.1.79161111111'
+    unittestDstAddr = '1.1.79162222222'
     client = SMPPClient(unittestHost, unittestPort, unittestSystemID, unittestPassword)
     client.send(unittestSrcAddr, unittestDstAddr, unittestMessage, True)
-    client.listen()
+
+    from threading import Thread
+    t = Thread(target = client.listen)
+    t.daemon = True
+    t.start()
+    import time
+    time.sleep(1)
+
+    client.unbind()
+    client.disconnect()
+    t.join()

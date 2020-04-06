@@ -1,7 +1,6 @@
 from smpplib.server import Server
 import logging
 
-logging.basicConfig(format='%(asctime)s %(levelname)-8s %(name)-24s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='DEBUG')
 
 class SMPPServer(Server):
 
@@ -20,6 +19,8 @@ class SMPPServer(Server):
 # Unittest
 if __name__=="__main__":
     import time
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='DEBUG')
+    logging.info("%s is started in unittest mode" % __file__.split('/')[-1])
 
     unittestPort = 3200
     server = SMPPServer(unittestPort)
