@@ -1,14 +1,24 @@
 import logging
 import sys
 import smpplib.gsm
+import smpplib.consts
 from smpplib.client import Client
 
 
 class SMPPClient(Client):
     def __init__(self, host, port, systemID, password):
         Client.__init__(self, host, port)
+        self.set_message_sent_handler(self.onSent)
+        self.set_message_received_handler(self.onRevc)
         self.connect()
         self.bind_transceiver(system_id = systemID, password = password)
+
+    def onSent(self, pdu, **kwargs):
+        logging.info('SMPPClient::onSent sent message seq:%s id:%s' % (str(pdu.sequence), str(pdu.message_id)))
+
+    def onRevc(self, pdu, **kwargs):
+        logging.info('SMPPClient::onReceived : received message id: {}\n'.format(pdu.receipted_message_id))
+
 
     def send(self, src, dst, message, isDRRequired):
         srcTon, srcNpi, srcAddr = src.split('.')
@@ -54,6 +64,7 @@ if __name__=="__main__":
     import time
     time.sleep(1)
 
+    # TODO: find a proper way of client thread terminating. Now client.disconnect() results in exception
     client.unbind()
     client.disconnect()
     t.join()
